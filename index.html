@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>¿Le cuentas cosas tuyas a una IA? · Encuesta anónima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0B14; --card:#15151F; --card2:#1C1C2A;
+  --txt:#F4F4FA; --dim:#9A9AB0; --line:#2A2A3C;
+  --p1:#7C5CFC; --p2:#FF5DA2; --p3:#3DD6C4; --p4:#FFC24B;
+  --disp:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--body);background:var(--bg);color:var(--txt);
+  min-height:100dvh;display:flex;justify-content:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(60vw 60vw at 15% -5%, rgba(124,92,252,.22), transparent 60%),
+    radial-gradient(55vw 55vw at 100% 10%, rgba(255,93,162,.16), transparent 55%),
+    radial-gradient(50vw 50vw at 50% 110%, rgba(61,214,196,.14), transparent 60%);
+  pointer-events:none}
+
+.app{position:relative;z-index:1;width:100%;max-width:520px;min-height:100dvh;
+  display:flex;flex-direction:column;padding:22px 20px 32px}
+
+.bar{height:6px;border-radius:99px;background:var(--card2);overflow:hidden;margin-bottom:8px}
+.fill{height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--p1),var(--p2));transition:width .5s cubic-bezier(.4,0,.2,1)}
+.step-lbl{font-size:12px;color:var(--dim);font-weight:500;letter-spacing:.02em;margin-bottom:auto}
+
+.screen{display:none;flex-direction:column;flex:1;animation:pop .45s cubic-bezier(.2,.7,.3,1) both}
+.screen.on{display:flex}
+@keyframes pop{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+.center{justify-content:center}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(30px,8vw,40px);line-height:1.05;letter-spacing:-.02em;margin-bottom:14px}
+.grad{background:linear-gradient(90deg,var(--p1),var(--p2) 60%,var(--p4));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-family:var(--disp);font-weight:500;font-size:16px;color:var(--p3);margin:-6px 0 16px}
+.lead{color:var(--dim);font-size:16px;line-height:1.55;margin-bottom:26px}
+.q{font-family:var(--disp);font-weight:600;font-size:clamp(21px,5.5vw,26px);line-height:1.2;letter-spacing:-.01em;margin:6px 0 20px}
+.qhint{font-size:14px;color:var(--dim);margin:-14px 0 22px}
+
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{background:#20202F;border:1.5px solid #33334A;border-radius:16px;
+  padding:16px 17px;font-size:15.5px;font-weight:500;color:var(--txt);text-align:left;
+  cursor:pointer;transition:transform .12s,border-color .18s,background .18s;
+  display:flex;align-items:center;gap:13px;line-height:1.35}
+.opt:active{transform:scale(.98)}
+.opt:hover{border-color:var(--p1)}
+.opt .idx{width:3px;height:20px;border-radius:99px;background:linear-gradient(180deg,var(--p1),var(--p2));flex-shrink:0}
+.opt.sel .idx{background:#fff}
+.opt.sel{border-color:var(--p2);background:linear-gradient(180deg,rgba(255,93,162,.18),rgba(124,92,252,.14));color:#fff!important}
+.opt.sel span{color:#fff!important}
+.opt.multi.sel::after{content:"✓";margin-left:auto;color:var(--p2);font-weight:700}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:#24243A;border:1.5px solid #3A3A52;border-radius:99px;
+  padding:12px 20px;font-size:16px;font-weight:600;color:#EDEDF5;cursor:pointer;transition:.15s}
+.chip:active{transform:scale(.95)}
+.chip.sel{background:var(--p1);border-color:#A78BFF;color:#fff!important;
+  box-shadow:0 0 0 3px rgba(124,92,252,.3),0 4px 16px rgba(124,92,252,.4)}
+
+.btn{margin-top:22px;background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;
+  border:none;border-radius:16px;padding:17px;font-family:var(--disp);font-weight:600;
+  font-size:16.5px;cursor:pointer;transition:.15s;width:100%;letter-spacing:.01em}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;pointer-events:none}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--dim);margin-top:12px}
+
+.back{background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;
+  padding:6px 0;margin-bottom:4px;align-self:flex-start;font-family:var(--body)}
+
+.free{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:16px;
+  padding:16px;color:var(--txt);font-family:var(--body);font-size:15.5px;resize:none;min-height:110px;line-height:1.5}
+.free:focus{outline:none;border-color:var(--p1)}
+.free::placeholder{color:var(--dim)}
+.skip{text-align:center;color:var(--dim);font-size:13.5px;margin-top:14px;cursor:pointer}
+
+.codein{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:14px 16px;color:var(--txt);font-family:var(--disp);font-size:17px;letter-spacing:.18em;
+  text-transform:uppercase;margin-top:14px}
+.codein:focus{outline:none;border-color:var(--p1)}
+.codein::placeholder{color:var(--dim);letter-spacing:.04em;text-transform:none;font-family:var(--body);font-size:14.5px}
+
+.tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--p3);border:1px solid rgba(61,214,196,.35);border-radius:99px;padding:6px 13px;margin-bottom:20px;width:fit-content}
+.safe{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 16px;
+  font-size:13.5px;color:var(--dim);line-height:1.5;margin-top:18px;display:flex;gap:11px;align-items:center}
+.safe .ic{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--p3);border:1px solid rgba(61,214,196,.4);border-radius:6px;padding:3px 8px;flex-shrink:0;height:fit-content}
+
+.done-emo{width:52px;height:52px;border-radius:16px;margin-bottom:18px;background:linear-gradient(135deg,var(--p1),var(--p2));display:flex;align-items:center;justify-content:center}
+.done-emo::after{content:"";width:20px;height:20px;border:3px solid #fff;border-radius:50%;border-top-color:transparent;transform:rotate(45deg)}
+
+.res{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:6px}
+.res .rk{font-size:12px;color:var(--p3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:10px}
+.res p{font-size:14px;color:var(--dim);line-height:1.6}
+.res b{color:var(--txt);font-weight:600}
+.res a{color:var(--p3);text-decoration:none;font-weight:600}
+
+.mapline{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:18px;margin-top:8px}
+.mapline .k{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:6px}
+.mapline .v{font-family:var(--disp);font-weight:600;font-size:19px}
+.verb-pill{display:inline-block;padding:4px 12px;border-radius:99px;font-size:14px;font-weight:600;margin-top:4px}
+
+.sendbox{font-size:13px;color:var(--dim);margin-top:16px;text-align:center;min-height:20px}
+.sendbox.err{color:var(--p4)}
+.sendbox.ok{color:var(--p3)}
+
+.proto{position:fixed;top:0;left:0;right:0;z-index:5;text-align:center;font-size:11px;
+  color:var(--dim);background:rgba(11,11,20,.85);padding:5px;letter-spacing:.05em;
+  border-bottom:1px solid var(--line);backdrop-filter:blur(6px);display:none}
+.proto.on{display:block}
+.app{padding-top:22px}
+.app.proto-on{padding-top:38px}
+</style>
+</head>
+<body>
+<div class="proto" id="proto">MODO PRUEBA · las respuestas se marcan como prueba</div>
+<div class="app" id="app">
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="step-lbl" id="steplbl"></div>
+
+  <!-- INTRO -->
+  <section class="screen center on" data-s="intro">
+    <span class="tag">2 minutos · anónimo</span>
+    <h1>¿Le cuentas<br><span class="grad">cosas tuyas</span><br>a una IA?</h1>
+    <p class="sub">No hablamos de las tareas.</p>
+    <p class="lead">Hablamos de las otras veces: cuando le escribes algo tuyo — cómo te sentías, un problema, algo que te daba vueltas. No venimos a decirte si eso está bien o mal. Queremos saber qué pasó <b style="color:var(--txt)">después</b>. No hay respuestas correctas.</p>
+    <div class="safe"><span class="ic">Privado</span><span>Anónimo de verdad. No pedimos tu nombre, tu teléfono ni nada que te identifique. Nadie lee esto en el momento, así que no podemos responderte a ti en particular — al final te dejamos dónde sí hay alguien.</span></div>
+    <input class="codein" id="codeIn" maxlength="8" placeholder="Código que te dio el colegio (si tienes uno)">
+    <button class="btn" onclick="go('edad')">Empezar</button>
+  </section>
+
+  <!-- EDAD -->
+  <section class="screen center" data-s="edad">
+    <button class="back" onclick="go('intro')">← atrás</button>
+    <div class="q">¿Cuántos años tienes?</div>
+    <div class="chips" id="edadChips"></div>
+    <button class="btn" id="edadNext" disabled onclick="go('genero')">Seguir</button>
+  </section>
+
+  <!-- GENERO -->
+  <section class="screen center" data-s="genero">
+    <button class="back" onclick="go('edad')">← atrás</button>
+    <div class="q">¿Con qué género te identificas?</div>
+    <div class="chips" id="genChips"></div>
+    <button class="btn" id="genNext" disabled onclick="go('usa')">Seguir</button>
+  </section>
+
+  <!-- ¿LA USA? -->
+  <section class="screen center" data-s="usa">
+    <button class="back" onclick="go('genero')">← atrás</button>
+    <div class="q">¿Alguna vez le has escrito a una IA sobre algo tuyo, personal?</div>
+    <p class="qhint">Cómo te sentías, un problema, algo que te daba vueltas. No las tareas del colegio.</p>
+    <div class="opts" id="usaOpts"></div>
+  </section>
+
+  <!-- NO USA: POR QUÉ -->
+  <section class="screen center" data-s="nousa">
+    <button class="back" onclick="go('usa')">← atrás</button>
+    <div class="q">¿Y por qué no?</div>
+    <p class="qhint">Lo que más se acerque.</p>
+    <div class="opts" id="nousaOpts"></div>
+  </section>
+
+  <!-- NO USA: CONOCE A ALGUIEN -->
+  <section class="screen center" data-s="conoce">
+    <button class="back" onclick="go('nousa')">← atrás</button>
+    <div class="q">¿Conoces a alguien de tu edad que sí lo haga?</div>
+    <div class="opts" id="conoceOpts"></div>
+  </section>
+
+  <!-- FRECUENCIA -->
+  <section class="screen center" data-s="frecuencia">
+    <button class="back" onclick="go('usa')">← atrás</button>
+    <div class="q">¿Cada cuánto te pasa eso?</div>
+    <p class="qhint">Escribirle a una IA sobre algo tuyo, personal.</p>
+    <div class="opts" id="frecOpts"></div>
+  </section>
+
+  <!-- TEMA -->
+  <section class="screen center" data-s="tema">
+    <button class="back" onclick="volverDeTema()">← atrás</button>
+    <div class="q">La última vez que pasó… ¿de qué se trataba?</div>
+    <p class="qhint">Elige lo que más se acerque. Nadie va a saber que fuiste tú.</p>
+    <div class="opts" id="temaOpts"></div>
+  </section>
+
+  <!-- QUE BUSCABA -->
+  <section class="screen center" data-s="busca">
+    <button class="back" onclick="go('tema')">← atrás</button>
+    <div class="q">¿Qué buscabas al escribirle?</div>
+    <p class="qhint">Puedes marcar más de una.</p>
+    <div class="opts" id="buscaOpts"></div>
+    <button class="btn" id="buscaNext" disabled onclick="go('caso')">Seguir</button>
+  </section>
+
+  <!-- ¿LE HIZO CASO? -->
+  <section class="screen center" data-s="caso">
+    <button class="back" onclick="go('busca')">← atrás</button>
+    <div class="q">Lo que te respondió, ¿lo hiciste?</div>
+    <div class="opts" id="casoOpts"></div>
+  </section>
+
+  <!-- EL DESPUES (clave) -->
+  <section class="screen center" data-s="despues">
+    <button class="back" onclick="go('caso')">← atrás</button>
+    <div class="q">Después de esa conversación con la IA… ¿qué hiciste?</div>
+    <p class="qhint">Esta es la que de verdad importa.</p>
+    <div class="opts" id="despuesOpts"></div>
+  </section>
+
+  <!-- CON QUIEN (condicional) -->
+  <section class="screen center" data-s="quien">
+    <button class="back" onclick="go('despues')">← atrás</button>
+    <div class="q">¿Con quién hablaste después?</div>
+    <div class="opts" id="quienOpts"></div>
+  </section>
+
+  <!-- SIRVIO -->
+  <section class="screen center" data-s="sirvio">
+    <button class="back" onclick="go('despues')">← atrás</button>
+    <div class="q">Y al final… ¿te sirvió hablar con la IA?</div>
+    <div class="opts" id="sirvioOpts"></div>
+  </section>
+
+  <!-- ¿ALGUIEN SABE? -->
+  <section class="screen center" data-s="sabe">
+    <button class="back" onclick="go('sirvio')">← atrás</button>
+    <div class="q">¿Alguien sabe que le cuentas estas cosas a una IA?</div>
+    <div class="opts" id="sabeOpts"></div>
+  </section>
+
+  <!-- LIBRE -->
+  <section class="screen center" data-s="libre">
+    <button class="back" onclick="go('sabe')">← atrás</button>
+    <div class="q">¿Hay algo que quieras contar con tus palabras?</div>
+    <p class="qhint">Opcional. Lo que quieras sobre esto.</p>
+    <textarea class="free" id="libreTxt" placeholder="Escribe aquí… o sáltalo, no pasa nada."></textarea>
+    <button class="btn" onclick="go('fin')">Terminar</button>
+    <div class="skip" onclick="go('fin')">Prefiero no escribir nada →</div>
+  </section>
+
+  <!-- FIN -->
+  <section class="screen center" data-s="fin">
+    <div class="done-emo"></div>
+    <h1>Listo.<br><span class="grad">Gracias por ser real.</span></h1>
+    <p class="lead">Eso era todo. Lo que contaste ayuda a entender cómo se vive esto de verdad — sin juzgar a nadie.</p>
+
+    <div class="res">
+      <div class="rk">Si algo de esto te quedó dando vueltas</div>
+      <p>Acá no hay nadie leyendo en tiempo real, pero sí hay lugares donde te contesta una persona, gratis y sin que tengas que dar tu nombre:</p>
+      <p style="margin-top:10px"><b>*4141</b> — línea del Minsal, gratis, todos los días, 24 horas.<br>
+      <b>1515 Línea Libre</b> — para niños, niñas y adolescentes, también por chat en <a href="https://www.linealibre.cl" target="_blank" rel="noopener">linealibre.cl</a>.<br>
+      Y en tu colegio: el o la <b>encargada de convivencia</b> u orientación.</p>
+    </div>
+
+    <div class="sendbox" id="sendbox"></div>
+    <button class="btn ghost" id="retryBtn" style="display:none" onclick="enviar()">Reintentar envío</button>
+
+    <div class="mapline" id="devLens" style="display:none">
+      <div class="k">↓ Vista de prueba (no la ve el adolescente)</div>
+      <div class="v" id="devVerb"></div>
+      <div class="v" style="font-size:13px;color:var(--dim);font-weight:400;margin-top:8px" id="devSummary"></div>
+    </div>
+    <button class="btn ghost" id="devBtn" style="display:none" onclick="toggleDev()">Ver cómo lo mapea el instrumento</button>
+    <button class="btn ghost" id="restartBtn" style="display:none" onclick="restart()">Reiniciar</button>
+  </section>
+
+</div>
+<script>
+/* ====== CONFIGURACIÓN ====== */
+// Pega aquí la URL /exec del Apps Script publicado (ver DEPLOY.md)
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbw7nUuhd9puOVeV9JB6JSN_gXLGO2G1xrsbcmaWez5PF2BDqJbHNfMy4HbWxnf2NZDaxQ/exec";
+
+/* ====== CONTEXTO (viene en el link del QR) ======
+   ?c=colegio  ?n=curso  ?f=codigofamilia  ?dev=1 (modo prueba) */
+const P = new URLSearchParams(location.search);
+const DEVMODE = P.get('dev') === '1';
+const META = {
+  colegio: P.get('c') || '',
+  curso:   P.get('n') || '',
+  familia: (P.get('f') || '').toUpperCase(),
+  inicio:  Date.now()
+};
+if (DEVMODE) {
+  document.getElementById('proto').classList.add('on');
+  document.getElementById('app').classList.add('proto-on');
+  document.getElementById('devBtn').style.display = 'block';
+  document.getElementById('restartBtn').style.display = 'block';
+}
+// si el código ya viene en el link, no se lo pedimos
+if (META.familia) document.getElementById('codeIn').style.display = 'none';
+document.getElementById('codeIn').addEventListener('input', e => {
+  META.familia = e.target.value.trim().toUpperCase();
+});
+
+/* ====== ESTADO ====== */
+const A={edad:null,genero:null,usa:null,frecuencia:null,tema:null,busca:[],hizo_caso:null,
+         despues:null,verbo:null,quien:null,sirvio:null,sabe_alguien:null,
+         nousa_motivo:null,nousa_conoce:null,libre:""};
+
+/* ====== OPCIONES ====== */
+const EDADES=["12","13","14","15","16","17","18"];
+const GEN=["Chica","Chico","No binario","Prefiero no decir"];
+
+const USA=[
+  {t:"Sí, más de una vez",v:"si"},
+  {t:"Una vez, para probar",v:"once"},
+  {t:"No, nunca",v:"no"},
+];
+const FREC=[
+  {t:"Casi todos los días"},
+  {t:"Varias veces al mes"},
+  {t:"Una vez al mes o menos"},
+  {t:"Solo esa vez"},
+];
+const CASO=[
+  {t:"Sí, hice lo que me dijo"},
+  {t:"Hice una parte"},
+  {t:"No lo hice"},
+  {t:"No me dijo qué hacer, solo me escuchó"},
+];
+const SABE=[
+  {t:"Sí, mis amigos"},
+  {t:"Sí, alguien de mi familia"},
+  {t:"No, nadie"},
+  {t:"No lo he pensado"},
+];
+const NOUSA=[
+  {t:"Nunca se me ocurrió"},
+  {t:"Prefiero hablarlo con personas"},
+  {t:"No confío en lo que le pasa a lo que escribo ahí"},
+  {t:"Me da lata o no me interesa"},
+  {t:"No uso IA para nada"},
+];
+const CONOCE=[
+  {t:"Sí, varios/as"},
+  {t:"Sí, alguien"},
+  {t:"No sé"},
+  {t:"No, nadie"},
+];
+const TEMA=[
+  {t:"Me sentía mal, ansioso/a o triste"},
+  {t:"Algo con un amigo/a o pareja"},
+  {t:"Algo en mi casa o familia"},
+  {t:"Quién soy, dudas sobre mí"},
+  {t:"Presión del colegio o el futuro"},
+  {t:"Algo que no le contaría a nadie"},
+  {t:"Otra cosa"},
+];
+const BUSCA=[
+  {t:"Que me escuchara"},
+  {t:"Ordenar lo que sentía"},
+  {t:"Un consejo o qué hacer"},
+  {t:"Ensayar cómo decírselo a alguien"},
+  {t:"No sentirme solo/a en ese momento"},
+];
+const DESPUES=[
+  {t:"Después hablé con alguien de verdad",verb:"complementa",next:"quien"},
+  {t:"Me ayudó a animarme a hablar con alguien",verb:"prepara",next:"quien"},
+  {t:"Me quedé más tranquilo/a y ahí quedó",verb:"posterga",next:"sirvio"},
+  {t:"Preferí seguir contándole a la IA, no a una persona",verb:"desplaza",next:"sirvio"},
+  {t:"No pasó nada en especial",verb:"neutro",next:"sirvio"},
+];
+const QUIEN=[
+  {t:"Un amigo o amiga"},
+  {t:"Mi mamá / papá / familia"},
+  {t:"Un profe u orientador/a"},
+  {t:"Un psicólogo/a"},
+  {t:"Mi pareja"},
+];
+const SIRVIO=[
+  {t:"Sí, me ayudó harto"},
+  {t:"Más o menos"},
+  {t:"La verdad no mucho"},
+];
+const VERB_INFO={
+  complementa:{c:"#3DD6C4",t:"COMPLEMENTA — habló con la IA y también con una persona"},
+  prepara:{c:"#7C5CFC",t:"PREPARA — la IA fue ensayo antes de hablar con alguien real"},
+  posterga:{c:"#FFC24B",t:"POSTERGA — se descargó con la IA y la conversación real no pasó"},
+  desplaza:{c:"#FF5DA2",t:"DESPLAZA — la IA reemplazó el hablar con una persona"},
+  neutro:{c:"#9A9AB0",t:"NEUTRO — uso puntual sin efecto claro"},
+};
+
+/* ====== NAVEGACIÓN ====== */
+const PASO={intro:0,edad:1,genero:2,usa:3,frecuencia:4,tema:5,busca:6,caso:7,despues:8,
+            quien:9,sirvio:10,sabe:11,libre:12,fin:13,
+            nousa:4,conoce:5};
+const TOTAL_LARGO=12, TOTAL_CORTO=5;
+function go(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on'));
+  document.querySelector('[data-s="'+s+'"]').classList.add('on');
+  const i=PASO[s], total=(A.usa==='no')?TOTAL_CORTO:TOTAL_LARGO;
+  document.getElementById('fill').style.width=Math.min(100,Math.round(i/(total+1)*100))+'%';
+  const lbl=document.getElementById('steplbl');
+  lbl.textContent=(s==='intro'||s==='fin')?'':('Parte '+i+' de '+total);
+  if(s==='fin'){ renderFin(); enviar(); }
+  window.scrollTo(0,0);
+}
+
+/* ====== RENDER DE OPCIONES ====== */
+function chips(cont,arr,key,btnId){
+  const c=document.getElementById(cont);c.innerHTML='';
+  arr.forEach(v=>{
+    const b=document.createElement('button');b.className='chip';b.textContent=v;
+    b.onclick=()=>{A[key]=v;[...c.children].forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
+      document.getElementById(btnId).disabled=false;};
+    c.appendChild(b);
+  });
+}
+function single(cont,arr,key,nextFn){
+  const c=document.getElementById(cont);c.innerHTML='';
+  arr.forEach(o=>{
+    const b=document.createElement('button');b.className='opt';
+    b.innerHTML='<span class="idx"></span><span>'+o.t+'</span>';
+    b.onclick=()=>{A[key]=o.v||o.t;[...c.children].forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
+      setTimeout(()=>nextFn(o),180);};
+    c.appendChild(b);
+  });
+}
+function multi(cont,arr,key,btnId){
+  const c=document.getElementById(cont);c.innerHTML='';A[key]=[];
+  arr.forEach(o=>{
+    const b=document.createElement('button');b.className='opt multi';
+    b.innerHTML='<span class="idx"></span><span>'+o.t+'</span>';
+    b.onclick=()=>{b.classList.toggle('sel');
+      A[key]=[...c.querySelectorAll('.sel')].map(x=>x.querySelector('span:last-child').textContent);
+      document.getElementById(btnId).disabled=A[key].length===0;};
+    c.appendChild(b);
+  });
+}
+
+chips('edadChips',EDADES,'edad','edadNext');
+chips('genChips',GEN,'genero','genNext');
+single('usaOpts',USA,'usa',o=>{
+  if(o.v==='no'){ go('nousa'); return; }
+  if(o.v==='once'){ A.frecuencia='Solo esa vez'; go('tema'); return; } // ya lo dijo, no lo repetimos
+  go('frecuencia');
+});
+single('frecOpts',FREC,'frecuencia',()=>go('tema'));
+function volverDeTema(){ go(A.usa==='once' ? 'usa' : 'frecuencia'); }
+single('nousaOpts',NOUSA,'nousa_motivo',()=>go('conoce'));
+single('conoceOpts',CONOCE,'nousa_conoce',()=>go('fin'));
+single('temaOpts',TEMA,'tema',()=>go('busca'));
+multi('buscaOpts',BUSCA,'busca','buscaNext');
+single('casoOpts',CASO,'hizo_caso',()=>go('despues'));
+single('despuesOpts',DESPUES,'despues',o=>{A.verbo=o.verb;go(o.next);});
+single('quienOpts',QUIEN,'quien',()=>go('sirvio'));
+single('sirvioOpts',SIRVIO,'sirvio',()=>go('sabe'));
+single('sabeOpts',SABE,'sabe_alguien',()=>go('libre'));
+document.getElementById('libreTxt').addEventListener('input',e=>A.libre=e.target.value);
+
+/* ====== ENVÍO ====== */
+let enviado=false;
+async function enviar(){
+  if(enviado) return;
+  const box=document.getElementById('sendbox');
+  const retry=document.getElementById('retryBtn');
+  box.className='sendbox'; box.textContent='Guardando tus respuestas…'; retry.style.display='none';
+  const payload=Object.assign({
+    rol:'adolescente',
+    prueba:DEVMODE?'SI':'',
+    familia:META.familia, colegio:META.colegio, curso:META.curso,
+    duracion_seg:Math.round((Date.now()-META.inicio)/1000)
+  },A);
+  try{
+    const r=await fetch(ENDPOINT,{method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)});
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error||'respuesta inválida');
+    enviado=true; box.className='sendbox ok'; box.textContent='Respuestas guardadas. Gracias.';
+  }catch(err){
+    box.className='sendbox err';
+    box.textContent='No se pudieron guardar (puede ser la conexión).';
+    retry.style.display='block';
+  }
+}
+
+/* ====== FIN ====== */
+function renderFin(){
+  const v=A.verbo;
+  const dv=document.getElementById('devVerb'), ds=document.getElementById('devSummary');
+  if(v){
+    dv.innerHTML='<span class="verb-pill" style="background:'+VERB_INFO[v].c+'22;color:'+VERB_INFO[v].c+'">'+VERB_INFO[v].t+'</span>';
+    ds.textContent='Edad '+(A.edad||'—')+' · '+(A.genero||'—')+' · frecuencia: '+(A.frecuencia||'—')+
+      ' · tema: '+(A.tema||'—')+' · buscaba: '+((A.busca||[]).join(', ')||'—')+
+      ' · hizo caso: '+(A.hizo_caso||'—')+
+      (A.quien?(' · habló con: '+A.quien):'')+(A.sirvio?(' · le sirvió: '+A.sirvio):'')+
+      ' · alguien sabe: '+(A.sabe_alguien||'—');
+  } else {
+    dv.innerHTML='<span class="verb-pill" style="background:#9A9AB022;color:#9A9AB0">NO USA IA PARA ESTO</span>';
+    ds.textContent='Edad '+(A.edad||'—')+' · '+(A.genero||'—')+' · motivo: '+(A.nousa_motivo||'—')+
+      ' · conoce a alguien: '+(A.nousa_conoce||'—');
+  }
+}
+let devOn=false;
+function toggleDev(){devOn=!devOn;document.getElementById('devLens').style.display=devOn?'block':'none';}
+function restart(){
+  for(const k in A) A[k]=Array.isArray(A[k])?[]:null;
+  A.libre=""; enviado=false; META.inicio=Date.now();
+  document.querySelectorAll('.chip,.opt').forEach(x=>x.classList.remove('sel'));
+  ['edadNext','genNext','buscaNext'].forEach(i=>document.getElementById(i).disabled=true);
+  document.getElementById('libreTxt').value="";
+  document.getElementById('sendbox').textContent='';
+  devOn=false; document.getElementById('devLens').style.display='none';
+  go('intro');
+}
+</script>
+</body>
+</html>
